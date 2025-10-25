@@ -47,7 +47,6 @@ fun ProductDetailsScreen(
     barcode: String,
     onNavigateBack: () -> Unit,
     onShowAlternatives: () -> Unit,
-    onAddProduct: (String) -> Unit,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
     LaunchedEffect(barcode) {
@@ -135,15 +134,8 @@ fun ProductDetailsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Share, // Use as placeholder for "not found"
-                            contentDescription = null,
-                            modifier = Modifier.size(80.dp),
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Product Not Found",
+                            text = "Error",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -156,24 +148,7 @@ fun ProductDetailsScreen(
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         
-                        // Add Product Button
                         Button(
-                            onClick = { onAddProduct(barcode) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add This Product")
-                        }
-                        
-                        Spacer(modifier = Modifier.height(12.dp))
-                        
-                        OutlinedButton(
                             onClick = onNavigateBack,
                             modifier = Modifier
                                 .fillMaxWidth()

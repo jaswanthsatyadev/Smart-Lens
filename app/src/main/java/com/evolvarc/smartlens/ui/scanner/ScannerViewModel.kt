@@ -41,7 +41,8 @@ class ScannerViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _uiState.value = ScannerUiState.Error(
-                        error.message ?: "Product not found in database"
+                        message = error.message ?: "Product not found in database",
+                        barcode = barcode
                     )
                 }
             )
@@ -57,5 +58,5 @@ sealed class ScannerUiState {
     object Scanning : ScannerUiState()
     object Loading : ScannerUiState()
     data class Success(val product: Product) : ScannerUiState()
-    data class Error(val message: String) : ScannerUiState()
+    data class Error(val message: String, val barcode: String? = null) : ScannerUiState()
 }

@@ -42,6 +42,7 @@ import java.util.concurrent.Executors
 @Composable
 fun ScannerScreen(
     onProductScanned: (String) -> Unit,
+    onAddProduct: (String) -> Unit,
     onHistoryClick: () -> Unit,
     viewModel: ScannerViewModel = hiltViewModel()
 ) {
@@ -241,6 +242,7 @@ fun ScannerScreen(
             }
             is ScannerUiState.Error -> {
                 val errorMessage = (uiState as ScannerUiState.Error).message
+                val scannedBarcode = (uiState as ScannerUiState.Error).barcode
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -278,7 +280,7 @@ fun ScannerScreen(
                             Text(
                                 text = when {
                                     errorMessage.contains("not found", ignoreCase = true) -> 
-                                        "This product isn't in our database yet. Try another barcode or enter it manually."
+                                        "This product isn't in our database yet."
                                     errorMessage.contains("network", ignoreCase = true) -> 
                                         "Check your internet connection and try again."
                                     errorMessage.contains("timeout", ignoreCase = true) -> 
@@ -290,6 +292,24 @@ fun ScannerScreen(
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
                             Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // Show "Add Product" button if product not found
+                            if (errorMessage.contains("not found", ignoreCase = true) && scannedBarcode != null) {
+                                Button(
+                                    onClick = { 
+                                        viewModel.resetScanner()
+                                        onAddProduct(scannedBarcode)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Add This Product")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {

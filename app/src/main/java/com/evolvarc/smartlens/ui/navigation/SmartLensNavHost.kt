@@ -55,6 +55,9 @@ fun SmartLensNavHost(
                 onProductScanned = { barcode ->
                     navController.navigate(Screen.ProductDetails.createRoute(barcode))
                 },
+                onAddProduct = { barcode ->
+                    navController.navigate(Screen.AddProduct.createRoute(barcode))
+                },
                 onHistoryClick = {
                     navController.popBackStack()
                 }
@@ -80,9 +83,6 @@ fun SmartLensNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onShowAlternatives = {
                     navController.navigate(Screen.Alternatives.createRoute(barcode))
-                },
-                onAddProduct = { barcodeToAdd ->
-                    navController.navigate(Screen.AddProduct.createRoute(barcodeToAdd))
                 }
             )
         }
