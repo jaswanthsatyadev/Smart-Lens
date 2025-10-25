@@ -19,7 +19,9 @@ data class OpenFoodFactsProduct(
     @Json(name = "ingredients_text") val ingredientsText: String?,
     @Json(name = "nutriments") val nutriments: Nutriments?,
     @Json(name = "nutriscore_grade") val nutriscoreGrade: String?,
-    @Json(name = "nova_group") val novaGroup: Int?
+    @Json(name = "nova_group") val novaGroup: Int?,
+    @Json(name = "allergens") val allergens: String?, // Comma-separated allergens
+    @Json(name = "allergens_tags") val allergensTags: List<String>? // en:milk, en:eggs, etc.
 )
 
 @JsonClass(generateAdapter = true)

@@ -20,6 +20,17 @@ fun OpenFoodFactsProduct.toDomainModel(): Product {
         )
     }
     
+    // Parse allergens from OpenFoodFacts data
+    val allergensList = mutableListOf<String>()
+    allergens?.split(",")?.forEach { allergensList.add(it.trim()) }
+    allergensTags?.forEach { tag ->
+        // Remove "en:" prefix and format nicely
+        val allergen = tag.removePrefix("en:").replace("-", " ").capitalize()
+        if (allergen !in allergensList) {
+            allergensList.add(allergen)
+        }
+    }
+    
     return Product(
         barcode = code ?: "",
         name = productName ?: "Unknown Product",
@@ -29,7 +40,8 @@ fun OpenFoodFactsProduct.toDomainModel(): Product {
         ingredientsText = ingredientsText,
         category = ProductCategory.FOOD,
         nutritionData = nutritionData,
-        beautyData = null
+        beautyData = null,
+        allergens = allergensList
     )
 }
 
@@ -68,7 +80,8 @@ fun OpenBeautyFactsProduct.toDomainModel(): Product {
         ingredientsText = ingredientsText,
         category = category,
         nutritionData = null,
-        beautyData = beautyData
+        beautyData = beautyData,
+        allergens = beautyData.allergens ?: emptyList()
     )
 }
 

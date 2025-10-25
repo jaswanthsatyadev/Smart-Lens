@@ -14,9 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.evolvarc.smartlens.ui.auth.AuthViewModel
 
 // Common allergens list
 val COMMON_ALLERGENS = listOf(
@@ -33,11 +36,107 @@ val COMMON_ALLERGENS = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToLogin: () -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    var userName by remember { mutableStateOf("") }
+    val isLoggedIn = authViewModel.isUserLoggedIn()
+    
+    if (!isLoggedIn) {
+        // Show login prompt for guest users
+        GuestProfileScreen(onNavigateToLogin = onNavigateToLogin)
+    } else {
+        // Show full profile for logged-in users
+        AuthenticatedProfileScreen(
+            modifier = modifier,
+            authViewModel = authViewModel,
+            onSignOut = {
+                authViewModel.signOut()
+            }
+        )
+    }
+}
+
+@Composable
+fun GuestProfileScreen(
+    onNavigateToLogin: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = null,
+            modifier = Modifier.size(120.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Sign in to unlock personalized features",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Text(
+            text = "• Save your allergies and dietary preferences\n• Get personalized product warnings\n• Track your scan history\n• Sync across devices",
+            fontSize = 14.sp,
+            textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            lineHeight = 24.sp
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Button(
+            onClick = onNavigateToLogin,
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Sign In",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+fun AuthenticatedProfileScreen(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    onSignOut: () -> Unit,
+    profileViewModel: ProfileViewModel = hiltViewModel()
+) {
+    val savedAllergies by profileViewModel.allergies.collectAsState()
     var selectedAllergies by remember { mutableStateOf<List<String>>(emptyList()) }
     var showAllergyDialog by remember { mutableStateOf(false) }
+    
+    // Sync with saved allergies from Firestore
+    LaunchedEffect(savedAllergies) {
+        selectedAllergies = savedAllergies
+    }
+    
+    // Get user name from Firebase Auth
+    val userName = authViewModel.currentUser()?.displayName ?: "User"
     
     Column(
         modifier = modifier
@@ -90,16 +189,10 @@ fun ProfileScreen(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                OutlinedTextField(
-                    value = userName,
-                    onValueChange = { userName = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Enter your name") },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
+                Text(
+                    text = userName,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }
         }
@@ -222,9 +315,7 @@ fun ProfileScreen(
             )
         ) {
             Button(
-                onClick = {
-                    // TODO: Implement sign out - call AuthRepository.signOut() and navigate to Login
-                },
+                onClick = onSignOut,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -257,6 +348,7 @@ fun ProfileScreen(
             onDismiss = { showAllergyDialog = false },
             onConfirm = { newAllergies ->
                 selectedAllergies = newAllergies
+                profileViewModel.saveAllergies(newAllergies)
                 showAllergyDialog = false
             }
         )

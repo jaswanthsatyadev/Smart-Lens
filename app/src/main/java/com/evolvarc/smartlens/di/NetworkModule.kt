@@ -3,6 +3,7 @@ package com.evolvarc.smartlens.di
 import com.evolvarc.smartlens.data.remote.api.OpenBeautyFactsApi
 import com.evolvarc.smartlens.data.remote.api.OpenFoodFactsApi
 import com.evolvarc.smartlens.data.remote.api.OpenProductsFactsApi
+import com.evolvarc.smartlens.data.remote.api.UsdaApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -28,6 +29,10 @@ annotation class BeautyRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ProductsRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class UsdaRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -104,5 +109,22 @@ object NetworkModule {
     @Singleton
     fun provideOpenProductsFactsApi(@ProductsRetrofit retrofit: Retrofit): OpenProductsFactsApi {
         return retrofit.create(OpenProductsFactsApi::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    @UsdaRetrofit
+    fun provideUsdaRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(UsdaApi.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideUsdaApi(@UsdaRetrofit retrofit: Retrofit): UsdaApi {
+        return retrofit.create(UsdaApi::class.java)
     }
 }

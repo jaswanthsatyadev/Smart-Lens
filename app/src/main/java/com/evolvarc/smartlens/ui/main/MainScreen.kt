@@ -35,7 +35,8 @@ sealed class BottomNavItem(
 fun MainScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
-    onNavigateToSearch: () -> Unit
+    onNavigateToSearch: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     val navController = rememberNavController()
     
@@ -92,7 +93,9 @@ fun MainScreen(
             }
             
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToLogin = onNavigateToLogin
+                )
             }
         }
     }

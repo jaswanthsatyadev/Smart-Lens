@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.evolvarc.smartlens" />
+                  <option name="mobileSdkAppId" value="1:1094624229539:android:38f093a68b4c7b6b3fa716" />
+                  <option name="projectId" value="smartlens-evolv" />
+                  <option name="projectNumber" value="1094624229539" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

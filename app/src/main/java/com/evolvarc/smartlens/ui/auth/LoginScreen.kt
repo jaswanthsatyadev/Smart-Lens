@@ -29,12 +29,11 @@ import com.google.android.gms.common.api.ApiException
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onContinueAsGuest: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    
-    var showPhoneDialog by remember { mutableStateOf(false) }
     
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -155,48 +154,19 @@ fun LoginScreen(
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
-            // OR Divider
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            // Continue as Guest Button
+            TextButton(
+                onClick = onContinueAsGuest,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Divider(modifier = Modifier.weight(1f))
                 Text(
-                    text = "  OR  ",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    text = "Continue as Guest",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Divider(modifier = Modifier.weight(1f))
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Phone Sign In Button (SECONDARY)
-            OutlinedButton(
-                onClick = { showPhoneDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "Continue with Phone",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -229,55 +199,4 @@ fun LoginScreen(
             )
         }
     }
-    
-    if (showPhoneDialog) {
-        PhoneAuthDialog(
-            onDismiss = { showPhoneDialog = false },
-            onVerify = { phoneNumber ->
-                viewModel.startPhoneAuth(phoneNumber, context as Activity)
-                showPhoneDialog = false
-            }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PhoneAuthDialog(
-    onDismiss: () -> Unit,
-    onVerify: (String) -> Unit
-) {
-    var phoneNumber by remember { mutableStateOf("+91") }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Phone Authentication") },
-        text = {
-            Column {
-                Text("Enter your phone number to receive an OTP")
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
-                    label = { Text("Phone Number") },
-                    placeholder = { Text("+91 1234567890") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onVerify(phoneNumber) },
-                enabled = phoneNumber.length > 10
-            ) {
-                Text("Send OTP")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }

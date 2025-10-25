@@ -35,7 +35,20 @@ class CalculateHealthScoreUseCase @Inject constructor() {
         
         var score = 70.0 // Start with neutral base
         var availableFields = 0
-        val totalKeyFields = 7 // sugars, fat, salt, calories, protein, fiber, nova
+        val totalKeyFields = 8 // sugars, fat, salt, calories, protein, fiber, nova, nutriscore
+        
+        // Use NutriScore if available (official health score)
+        nutrition.nutriScoreGrade?.let { grade ->
+            availableFields++
+            score = when (grade.lowercase()) {
+                "a" -> 95.0
+                "b" -> 80.0
+                "c" -> 60.0
+                "d" -> 40.0
+                "e" -> 20.0
+                else -> score
+            }
+        }
         
         // Negative factors
         nutrition.sugars100g?.let { sugar ->

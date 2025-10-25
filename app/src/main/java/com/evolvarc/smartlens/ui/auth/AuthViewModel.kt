@@ -130,4 +130,14 @@ class AuthViewModel @Inject constructor(
     fun isUserLoggedIn(): Boolean {
         return authRepository.isUserLoggedIn()
     }
+    
+    fun currentUser() = authRepository.currentUser
+    
+    fun signOut() {
+        viewModelScope.launch {
+            authRepository.signOut()
+            googleSignInClient.signOut()
+            _uiState.value = AuthUiState.Idle
+        }
+    }
 }

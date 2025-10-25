@@ -13,6 +13,7 @@ data class Product(
     
     val nutritionData: NutritionData? = null,
     val beautyData: BeautyData? = null,
+    val allergens: List<String> = emptyList(), // Common allergens for all products
     
     val healthScore: Int = 0,
     val dataAvailability: CalculateHealthScoreUseCase.DataAvailability = CalculateHealthScoreUseCase.DataAvailability.INSUFFICIENT,

@@ -104,8 +104,11 @@ fun ProductDetailsScreen(
                     enter = fadeIn(animationSpec = tween(500)) + 
                             slideInVertically(initialOffsetY = { it / 4 })
                 ) {
+                    val allergenWarnings by viewModel.allergenWarnings.collectAsState()
+                    
                     ProductContent(
                         product = state.product,
+                        allergenWarnings = allergenWarnings,
                         onShowAlternatives = onShowAlternatives,
                         modifier = Modifier.padding(padding)
                     )
@@ -140,6 +143,7 @@ fun ProductDetailsScreen(
 @Composable
 fun ProductContent(
     product: Product,
+    allergenWarnings: List<com.evolvarc.smartlens.domain.usecase.AllergenWarning>,
     onShowAlternatives: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -213,7 +217,10 @@ fun ProductContent(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            ScoreCircle(score = product.healthScore)
+            ScoreCircle(
+                score = product.healthScore,
+                dataAvailability = product.dataAvailability
+            )
             
             Spacer(modifier = Modifier.height(12.dp))
             
@@ -270,6 +277,63 @@ fun ProductContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
         
+        // Personalized allergen warnings (for logged-in users)
+        if (allergenWarnings.isNotEmpty()) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "🚫",
+                                fontSize = 24.sp
+                            )
+                            Text(
+                                text = "Allergen Alert",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        allergenWarnings.forEach { warning ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text(
+                                    text = warning.message,
+                                    modifier = Modifier.padding(12.dp),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onError
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+        
         if (product.warnings.isNotEmpty()) {
             item {
                 LazyRow(
@@ -293,22 +357,23 @@ fun ProductContent(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            Button(
-                onClick = onShowAlternatives,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Show Better Alternatives",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
+            // Disabled Better Alternatives feature
+            // Button(
+            //     onClick = onShowAlternatives,
+            //     modifier = Modifier
+            //         .fillMaxWidth()
+            //         .padding(horizontal = 16.dp)
+            //         .height(56.dp),
+            //     shape = RoundedCornerShape(12.dp)
+            // ) {
+            //     Text(
+            //         text = "Show Better Alternatives",
+            //         fontSize = 16.sp,
+            //         fontWeight = FontWeight.SemiBold
+            //     )
+            // }
+            // 
+            // Spacer(modifier = Modifier.height(24.dp))
             
             // Where to Buy Section
             BuyLinksSection(

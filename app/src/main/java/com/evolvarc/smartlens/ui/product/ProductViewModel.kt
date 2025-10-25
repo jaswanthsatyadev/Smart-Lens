@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evolvarc.smartlens.data.repository.ProductRepository
 import com.evolvarc.smartlens.domain.model.Product
+import com.evolvarc.smartlens.domain.usecase.AllergenWarning
+import com.evolvarc.smartlens.domain.usecase.CheckAllergenWarningsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,11 +15,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
+    private val checkAllergenWarnings: CheckAllergenWarningsUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<ProductUiState>(ProductUiState.Loading)
     val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
+    
+    private val _allergenWarnings = MutableStateFlow<List<AllergenWarning>>(emptyList())
+    val allergenWarnings: StateFlow<List<AllergenWarning>> = _allergenWarnings.asStateFlow()
     
     fun loadProduct(barcode: String) {
         viewModelScope.launch {
@@ -26,6 +32,10 @@ class ProductViewModel @Inject constructor(
             repository.getProductByBarcode(barcode).fold(
                 onSuccess = { product ->
                     _uiState.value = ProductUiState.Success(product)
+                    
+                    // Check for allergen warnings
+                    val warnings = checkAllergenWarnings(product)
+                    _allergenWarnings.value = warnings
                 },
                 onFailure = { error ->
                     _uiState.value = ProductUiState.Error(
