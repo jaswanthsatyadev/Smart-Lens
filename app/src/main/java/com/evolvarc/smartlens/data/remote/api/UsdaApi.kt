@@ -51,7 +51,7 @@ interface UsdaApi {
         const val BASE_URL = "https://api.nal.usda.gov/"
         
         // USDA API Key - You need to get your own from: https://fdc.nal.usda.gov/api-key-signup.html
-        const val API_KEY = "DEMO_KEY" // Replace with actual key
+        const val API_KEY = "MX95owZEYs3lhrLcAelmna7jz31LhAYQEw82SsjF" // Replace with actual key
         
         // Common nutrient IDs
         object NutrientIds {

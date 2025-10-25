@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.evolvarc.smartlens.ui.alternatives.AlternativesScreen
+import com.evolvarc.smartlens.ui.addproduct.AddProductScreen
 import com.evolvarc.smartlens.ui.auth.LoginScreen
 import com.evolvarc.smartlens.ui.main.MainScreen
 import com.evolvarc.smartlens.ui.product.ProductDetailsScreen
@@ -79,7 +80,21 @@ fun SmartLensNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onShowAlternatives = {
                     navController.navigate(Screen.Alternatives.createRoute(barcode))
+                },
+                onAddProduct = { barcodeToAdd ->
+                    navController.navigate(Screen.AddProduct.createRoute(barcodeToAdd))
                 }
+            )
+        }
+        
+        composable(
+            route = Screen.AddProduct.route,
+            arguments = listOf(navArgument("barcode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val barcode = backStackEntry.arguments?.getString("barcode") ?: return@composable
+            AddProductScreen(
+                barcode = barcode,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         

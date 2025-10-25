@@ -36,16 +36,18 @@ class CalculateHealthScoreUseCase @Inject constructor() {
         var score = 70.0 // Start with neutral base
         var availableFields = 0
         val totalKeyFields = 8 // sugars, fat, salt, calories, protein, fiber, nova, nutriscore
+        var hasNutriScore = false
         
-        // Use NutriScore if available (official health score)
+        // Use NutriScore as primary indicator if available (official health score)
         nutrition.nutriScoreGrade?.let { grade ->
+            hasNutriScore = true
             availableFields++
             score = when (grade.lowercase()) {
-                "a" -> 95.0
-                "b" -> 80.0
-                "c" -> 60.0
-                "d" -> 40.0
-                "e" -> 20.0
+                "a" -> 92.0
+                "b" -> 78.0
+                "c" -> 58.0
+                "d" -> 38.0
+                "e" -> 18.0
                 else -> score
             }
         }
@@ -122,9 +124,12 @@ class CalculateHealthScoreUseCase @Inject constructor() {
         
         val finalScore = max(0, min(100, score.toInt()))
         
+        // More lenient data availability logic
         val dataAvailability = when {
-            availableFields >= 5 -> DataAvailability.COMPLETE
-            availableFields >= 3 -> DataAvailability.PARTIAL
+            hasNutriScore && availableFields >= 3 -> DataAvailability.COMPLETE // NutriScore + some nutrition = complete
+            availableFields >= 4 -> DataAvailability.COMPLETE // 4+ fields = complete
+            availableFields >= 2 -> DataAvailability.PARTIAL  // 2-3 fields = partial
+            availableFields >= 1 -> DataAvailability.PARTIAL  // Even 1 field = partial (show score)
             else -> DataAvailability.INSUFFICIENT
         }
         

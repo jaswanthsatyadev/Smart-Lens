@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -32,6 +34,7 @@ import coil.compose.AsyncImage
 import com.evolvarc.smartlens.domain.model.Product
 import com.evolvarc.smartlens.domain.model.ProductCategory
 import com.evolvarc.smartlens.ui.components.CategoryBadge
+import com.evolvarc.smartlens.ui.components.NutriScoreBadgeLarge
 import com.evolvarc.smartlens.ui.components.ProductDetailsShimmer
 import com.evolvarc.smartlens.ui.components.ScoreCircle
 import com.evolvarc.smartlens.ui.components.WarningBadge
@@ -44,6 +47,7 @@ fun ProductDetailsScreen(
     barcode: String,
     onNavigateBack: () -> Unit,
     onShowAlternatives: () -> Unit,
+    onAddProduct: (String) -> Unit,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
     LaunchedEffect(barcode) {
@@ -101,8 +105,14 @@ fun ProductDetailsScreen(
                 
                 AnimatedVisibility(
                     visible = isVisible,
-                    enter = fadeIn(animationSpec = tween(500)) + 
-                            slideInVertically(initialOffsetY = { it / 4 })
+                    enter = fadeIn(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)) + 
+                            slideInVertically(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                ),
+                                initialOffsetY = { it / 4 }
+                            )
                 ) {
                     val allergenWarnings by viewModel.allergenWarnings.collectAsState()
                     
@@ -121,16 +131,54 @@ fun ProductDetailsScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share, // Use as placeholder for "not found"
+                            contentDescription = null,
+                            modifier = Modifier.size(80.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Error",
-                            fontSize = 20.sp,
+                            text = "Product Not Found",
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = state.message)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onNavigateBack) {
+                        Text(
+                            text = state.message,
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        // Add Product Button
+                        Button(
+                            onClick = { onAddProduct(barcode) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Add This Product")
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        OutlinedButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                        ) {
                             Text("Go Back")
                         }
                     }
@@ -163,12 +211,25 @@ fun ProductContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (product.imageUrl != null) {
+                    val scale by animateFloatAsState(
+                        targetValue = 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "image_scale"
+                    )
+                    
                     AsyncImage(
                         model = product.imageUrl,
                         contentDescription = product.name,
                         modifier = Modifier
                             .size(80.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(12.dp))
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            },
                         contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -217,8 +278,27 @@ fun ProductContent(
             
             Spacer(modifier = Modifier.height(16.dp))
             
+            // Show NutriScore badge prominently if available
+            product.nutritionData?.nutriScoreGrade?.let { grade ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Official NutriScore",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    NutriScoreBadgeLarge(grade = grade)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+            
             ScoreCircle(
                 score = product.healthScore,
+                nutriScoreGrade = null, // Don't show again inside circle
                 dataAvailability = product.dataAvailability
             )
             
