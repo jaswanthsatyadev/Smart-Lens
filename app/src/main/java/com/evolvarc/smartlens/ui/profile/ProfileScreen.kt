@@ -40,8 +40,13 @@ fun ProfileScreen(
     onNavigateToLogin: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val isLoggedIn = authViewModel.isUserLoggedIn()
+    // LOGIN DISABLED FOR NOW - Will be enabled in future version
+    // val isLoggedIn = authViewModel.isUserLoggedIn()
     
+    // Always show the basic profile screen without login requirement
+    BasicProfileScreen(modifier = modifier)
+    
+    /* COMMENTED OUT - LOGIN FEATURE DISABLED
     if (!isLoggedIn) {
         // Show login prompt for guest users
         GuestProfileScreen(onNavigateToLogin = onNavigateToLogin)
@@ -55,7 +60,257 @@ fun ProfileScreen(
             }
         )
     }
+    */
 }
+
+@Composable
+fun BasicProfileScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        // App Info Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "SmartLens",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "Version 1.0.0",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // About Section
+        Text(
+            text = "About",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "SmartLens is your intelligent shopping companion that helps you make healthier choices. Simply scan any product barcode to get instant health scores, nutritional information, and personalized warnings.",
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Key Features:",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                FeatureItem("🔍 Barcode Scanner", "Scan any food or beauty product")
+                FeatureItem("📊 Health Scoring", "AI-powered health analysis")
+                FeatureItem("🌍 Multi-API Data", "OpenFoodFacts + USDA integration")
+                FeatureItem("🏆 NutriScore", "Official nutritional grade display")
+                FeatureItem("🔎 Product Search", "Find products by name")
+                FeatureItem("➕ Add Products", "Contribute missing products")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Developer Section
+        Text(
+            text = "Developer",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Jaswanth Satya Dev",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Android Developer",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                
+                ContactItem(Icons.Default.Email, "jaswanthsatyadev@gmail.com")
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Social Links
+                Text(
+                    text = "Connect:",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                SocialLinkItem("LinkedIn", "linkedin.com/in/jaswanth-satya-dev")
+                SocialLinkItem("GitHub", "github.com/jaswanthsatyadev")
+                SocialLinkItem("X (Twitter)", "x.com/jaswanthsatydev")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Legal & Info
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                InfoRow("Data Sources", "OpenFoodFacts, USDA FoodData Central")
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                InfoRow("Framework", "Jetpack Compose, Material 3")
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                InfoRow("Backend", "Firebase (Auth, Firestore, Storage)")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "See LICENSE for usage and permissions.",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+fun FeatureItem(icon: String, description: String) {
+    Row(
+        modifier = Modifier.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = icon, fontSize = 18.sp)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = description,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        )
+    }
+}
+
+@Composable
+fun ContactItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(
+        modifier = Modifier.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        )
+    }
+}
+
+@Composable
+fun SocialLinkItem(platform: String, link: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "•",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.width(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = platform,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+            Text(
+                text = link,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+/* COMMENTED OUT - LOGIN FEATURE DISABLED FOR NOW
 
 @Composable
 fun GuestProfileScreen(
@@ -534,3 +789,5 @@ fun AllergySelectionDialog(
         }
     }
 }
+
+*/  // END OF COMMENTED LOGIN FEATURE CODE

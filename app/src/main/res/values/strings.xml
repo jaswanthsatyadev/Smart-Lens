@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Smart Lens</string>
+    <string name="app_name">SmartLens</string>
     <!-- Web client ID for Google Sign-In -->
     <!-- TODO: Replace with actual OAuth 2.0 client ID from Firebase Console -->
     <!-- Go to: Firebase Console > Authentication > Sign-in method > Google > Web SDK configuration -->

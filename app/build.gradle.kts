@@ -7,6 +7,16 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// Load local.properties
+val localProperties = org.jetbrains.kotlin.konan.properties.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+// Get API keys from local.properties or use default values
+val usdaApiKey = localProperties.getProperty("USDA_API_KEY") ?: "DEMO_KEY"
+
 android {
     namespace = "com.evolvarc.smartlens"
     compileSdk = 36
@@ -16,18 +26,30 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // App metadata
+        setProperty("archivesBaseName", "SmartLens-v$versionName")
+        
+        // Inject API keys as BuildConfig fields
+        buildConfigField("String", "USDA_API_KEY", "\"$usdaApiKey\"")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Signing config will be added here when ready for release
+        }
+        debug {
+            isMinifyEnabled = false
+            versionNameSuffix = "-DEBUG"
         }
     }
     compileOptions {
@@ -39,6 +61,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

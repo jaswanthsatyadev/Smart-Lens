@@ -1,5 +1,6 @@
 package com.evolvarc.smartlens.data.remote.api
 
+import com.evolvarc.smartlens.BuildConfig
 import com.evolvarc.smartlens.data.remote.dto.UsdaFoodDetailResponse
 import com.evolvarc.smartlens.data.remote.dto.UsdaSearchResponse
 import retrofit2.http.GET
@@ -50,8 +51,10 @@ interface UsdaApi {
     companion object {
         const val BASE_URL = "https://api.nal.usda.gov/"
         
-        // USDA API Key - You need to get your own from: https://fdc.nal.usda.gov/api-key-signup.html
-        const val API_KEY = "MX95owZEYs3lhrLcAelmna7jz31LhAYQEw82SsjF" // Replace with actual key
+        // USDA API Key loaded from local.properties
+        // To get your own key: https://fdc.nal.usda.gov/api-key-signup.html
+        // Add to local.properties: USDA_API_KEY=your_key_here
+        val API_KEY: String = BuildConfig.USDA_API_KEY
         
         // Common nutrient IDs
         object NutrientIds {
